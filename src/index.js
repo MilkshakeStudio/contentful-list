@@ -33,7 +33,8 @@ export const App = ({sdk}) => {
     return detatchValueChangeHandler;
   });
 
-  return (
+   return (
+      
     <TextInput
       width="large"
       type="text"
