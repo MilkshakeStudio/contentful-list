@@ -1,0 +1,8 @@
+{
+  "id": "contentful-list",
+  "name": "contentful-list",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": [
+    "Object"
+  ]
+}
