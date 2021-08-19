@@ -1,26 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { TextInput } from '@contentful/forma-36-react-components';
+import { Card, TextInput } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
 export const App = ({sdk}) => {
-  const [value, setValue] = useState(sdk.field.getValue() || '');
+
+  const [ listItems, setListItems ] = useState( sdk.field.getValue() ||
+    {
+      listArr: [
+        {
+          header: "header1", content: "content1"
+        }
+      ],
+      dragging: false
+    }
+  )
 
   const onExternalChange = value => {
-    setValue(value);
+    setListItems(value);
   }
 
-  const onChange = e => {
-    const value = e.currentTarget.value;
-    setValue(value);
-    if (value) {
-      sdk.field.setValue(value);
-    } else {
-      sdk.field.removeValue();
+  const handleChange = (e) => {
+    const target = e.target
+    const targetIndex = target.dataset.index
+
+    const newList = listItems.listArr.slice()
+    if (target.name === "header") { newList[targetIndex] = {
+        header: target.value,
+        content: newList[targetIndex].content
+      }
+    } else if (target.name === "content") {
+      newList[targetIndex] = {
+        header: newList[targetIndex].header,
+        content: target.value
+      }
     }
+    console.log(newList)
+    setListItems({listArr: newList})
+    sdk.field.setValue(listItems)
   }
 
   useEffect(() => {
@@ -33,17 +53,30 @@ export const App = ({sdk}) => {
     return detatchValueChangeHandler;
   });
 
-   return (
-      
-    <TextInput
-      width="large"
-      type="text"
-      id="my-field"
-      testId="my-field"
-      value={value}
-      onChange={onChange}
-    />
-  );
+  return (
+    <>
+      { listItems.listArr.map( (item, i) => (
+        <Card
+          key={i}
+        >
+          <TextInput
+            type="text"
+            name="header"
+            value={item.header}
+            onChange={handleChange}
+            data-index={i}
+          />
+          <TextInput
+            type="text"
+            name="content"
+            value={item.content}
+            onChange={handleChange}
+            data-index={i}
+          />
+        </Card>
+      ))}
+    </>
+  )
 }
 
 App.propTypes = {
