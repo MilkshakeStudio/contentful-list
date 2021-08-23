@@ -30,11 +30,13 @@
     "@contentful/forma-36-fcss": "^0.0.35",
     "@contentful/forma-36-react-components": "3.11.3",
     "@contentful/forma-36-tokens": "^0.5.2",
+    "array-move": "^4.0.0",
     "contentful-ui-extensions-sdk": "3.24.0",
     "prop-types": "15.7.2",
     "react": "16.14.0",
+    "react-beautiful-dnd": "^13.1.0",
     "react-dom": "16.14.0",
-    "react-sortable-hoc": "^2.0.0"
+    "uuid": "^8.3.2"
   },
   "browserslist": [
     "last 5 Chrome version",

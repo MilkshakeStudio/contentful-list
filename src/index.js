@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { List, ListItem, Card, TextInput, FormLabel, Button } from '@contentful/forma-36-react-components';
+import { Form, Card, TextInput, FormLabel, Button } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
-import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { arrayMoveImmutable } from 'array-move';
+import { v4 as uuidv4 } from 'uuid';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
@@ -13,6 +15,7 @@ export const App = ({sdk}) => {
     {
       listArr: [
         {
+          id: uuidv4(),
           header: "",
           content: ""
         }
@@ -31,12 +34,13 @@ export const App = ({sdk}) => {
 
   const handleChange = (e) => {
     const target = e.target
-    const targetIndex = target.dataset.index
+    const listId = target.dataset.listId
     const newList = listItems.listArr.slice()
-    if (target.name === "header") {
-      newList[targetIndex].header = target.value
-    } else if (target.name === "content") {
-      newList[targetIndex].content = target.value
+    for (let item of newList) {
+      if (listId === item.id ) {
+        target.name === "header" && (item.header = target.value)
+        target.name === "content" && (item.content = target.value)
+      }
     }
     setListItems( prevState => (
       {
@@ -65,6 +69,7 @@ export const App = ({sdk}) => {
         listArr: [
           ...prevState.listArr,
           {
+            id: uuidv4(),
             header: "",
             content: ""
           }
@@ -76,12 +81,10 @@ export const App = ({sdk}) => {
 
   const handleDeleteItem = (e) => {
     const target = e.target
-    const targetIndex = target.closest(".btn-remove").dataset.index
+    const listId = target.closest(".btn-remove").dataset.listId
     const newList = listItems.listArr.slice()
-    for (let i = 0; i < newList.length; i++) {
-      if (i == targetIndex) {
-        newList.splice(targetIndex, 1)
-      }
+    for (let [index, item] of newList.entries()) {
+      listId === item.id && (newList.splice(index, 1))
     }
     setListItems( prevState => (
       {
@@ -96,49 +99,95 @@ export const App = ({sdk}) => {
 //  SORTABLE HANDLERS
 //===============================================================/
 
-  console.log(sdk.field.getValue())
+  const onDragEnd = (result) => {
+    const sourceIndex = result.source.index
+    const destinationIndex = result.destination.index
+    const oldList = listItems.listArr.slice()
+    const newList = arrayMoveImmutable(oldList, sourceIndex, destinationIndex)
+    setListItems( prevState => (
+      {
+        ...prevState,
+        listArr: newList
+      }
+    ))
+    sdk.field.setValue(listItems)
+  }
+
+//===============================================================/
+//  SORTABLE COMPONENTS
+//===============================================================/
+
+  const SortableItem = (item, i) => {
+    return (
+      <Draggable draggableId={item.id} index={i} key={item.id}>
+        {(provided) => (
+          <li
+            key={item.id}
+            id={item.id}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            <Card>
+              <Form spacing="condensed" >
+                <FormLabel htmlFor="header">Heading</FormLabel>
+                <TextInput
+                  type="text"
+                  name="header"
+                  value={item.header}
+                  onChange={handleChange}
+                  data-list-id={item.id}
+                />
+                <FormLabel htmlFor="content">Content</FormLabel>
+                <TextInput
+                  type="text"
+                  name="content"
+                  value={item.content}
+                  onChange={handleChange}
+                  data-list-id={item.id}
+                />
+                <Button
+                  buttonType="negative"
+                  size="small"
+                  icon="HorizontalRule"
+                  data-list-id={item.id}
+                  onClick={handleDeleteItem}
+                  className="btn-remove" 
+                ></Button>
+              </Form>
+            </Card>
+          </li>
+        )}
+      </Draggable>
+    )
+  }
+
+//===============================================================/
+//  RENDERED COMPONENT
+//===============================================================/
 
   return (
-    <>
-      <List element="ol">
-        { listItems.listArr.map( (item, i) => (
-          <ListItem key={i}>
-            <Card>
-              <FormLabel htmlFor="header">Heading</FormLabel>
-              <TextInput
-                type="text"
-                name="header"
-                value={item.header}
-                onChange={handleChange}
-                data-index={i}
-              />
-              <FormLabel htmlFor="content">Content</FormLabel>
-              <TextInput
-                type="text"
-                name="content"
-                value={item.content}
-                onChange={handleChange}
-                data-index={i}
-              />
-              <Button
-                buttonType="negative"
-                size="small"
-                icon="HorizontalRule"
-                data-index={i}
-                onClick={handleDeleteItem}
-                className="btn-remove" 
-              ></Button>
-            </Card>
-          </ListItem>
-        ))}
-      </List>
+    <DragDropContext
+      onDragEnd={onDragEnd}
+    >
+      <Droppable droppableId="list-block-droppable">
+        {(provided) => (
+          <ul
+            ref={provided.innerRef}
+            { ...provided.droppableProps}
+          >
+            {listItems.listArr.map( (item, i) => ( SortableItem(item, i) ))}
+            {provided.placeholder}
+          </ul>
+        )}
+      </Droppable>
       <Button
         buttonType="positive"
         size="small"
         icon="Plus"
         onClick={handleAddItem}
       ></Button>
-    </>
+    </DragDropContext>
   )
 }
 
