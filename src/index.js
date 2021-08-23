@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { List, ListItem, Card, TextInput, FormLabel, Button } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
+import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
@@ -23,6 +24,10 @@ export const App = ({sdk}) => {
   // const onExternalChange = value => {
   //   setListItems(value);
   // }
+
+//===============================================================/
+//  CONTENT HANDLERS
+//===============================================================/
 
   const handleChange = (e) => {
     const target = e.target
@@ -87,36 +92,52 @@ export const App = ({sdk}) => {
     sdk.field.setValue(listItems)
   }
 
-  console.log(listItems)
+//===============================================================/
+//  SORTABLE HANDLERS
+//===============================================================/
+
+  console.log(sdk.field.getValue())
 
   return (
     <>
-    <List element="ol">
-      { listItems.listArr.map( (item, i) => (
-        <ListItem key={i}>
-          <Card>
-            <FormLabel htmlFor="header">Heading</FormLabel>
-            <TextInput
-              type="text"
-              name="header"
-              value={item.header}
-              onChange={handleChange}
-              data-index={i}
-            />
-            <FormLabel htmlFor="content">Content</FormLabel>
-            <TextInput
-              type="text"
-              name="content"
-              value={item.content}
-              onChange={handleChange}
-              data-index={i}
-            />
-            <Button buttonType="negative" size="small" icon="HorizontalRule" data-index={i} onClick={handleDeleteItem} className="btn-remove" ></Button>
-          </Card>
-        </ListItem>
-      ))}
-    </List>
-    <Button buttonType="positive" size="small" icon="Plus" onClick={handleAddItem} ></Button>
+      <List element="ol">
+        { listItems.listArr.map( (item, i) => (
+          <ListItem key={i}>
+            <Card>
+              <FormLabel htmlFor="header">Heading</FormLabel>
+              <TextInput
+                type="text"
+                name="header"
+                value={item.header}
+                onChange={handleChange}
+                data-index={i}
+              />
+              <FormLabel htmlFor="content">Content</FormLabel>
+              <TextInput
+                type="text"
+                name="content"
+                value={item.content}
+                onChange={handleChange}
+                data-index={i}
+              />
+              <Button
+                buttonType="negative"
+                size="small"
+                icon="HorizontalRule"
+                data-index={i}
+                onClick={handleDeleteItem}
+                className="btn-remove" 
+              ></Button>
+            </Card>
+          </ListItem>
+        ))}
+      </List>
+      <Button
+        buttonType="positive"
+        size="small"
+        icon="Plus"
+        onClick={handleAddItem}
+      ></Button>
     </>
   )
 }
