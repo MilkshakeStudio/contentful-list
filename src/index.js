@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { Form, Card, TextInput, FormLabel, Button } from '@contentful/forma-36-react-components';
+import { Form, Card, TextInput, Textarea, FormLabel, Button } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { arrayMoveImmutable } from 'array-move';
@@ -10,6 +10,10 @@ import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
 export const App = ({sdk}) => {
+
+//===============================================================/
+//  CONTENT STATE
+//===============================================================/
 
   const [ listItems, setListItems ] = useState( sdk.field.getValue() ||
     {
@@ -24,13 +28,13 @@ export const App = ({sdk}) => {
     }
   )
 
-  // const onExternalChange = value => {
-  //   setListItems(value);
-  // }
-
 //===============================================================/
 //  CONTENT HANDLERS
 //===============================================================/
+
+  // const onExternalChange = value => {
+  //   setListItems(value);
+  // }
 
   const handleChange = (e) => {
     const target = e.target
@@ -61,6 +65,9 @@ export const App = ({sdk}) => {
   //   return detatchValueChangeHandler;
   // });
 
+//===============================================================/
+//  CARD HANDLERS
+//===============================================================/
 
   const handleAddItem = () => {
     setListItems( prevState => (
@@ -94,10 +101,6 @@ export const App = ({sdk}) => {
     ))
     sdk.field.setValue(listItems)
   }
-
-//===============================================================/
-//  SORTABLE HANDLERS
-//===============================================================/
 
   const onDragEnd = (result) => {
     const sourceIndex = result.source.index
@@ -139,12 +142,13 @@ export const App = ({sdk}) => {
                   data-list-id={item.id}
                 />
                 <FormLabel htmlFor="content">Content</FormLabel>
-                <TextInput
+                <Textarea
                   type="text"
                   name="content"
                   value={item.content}
                   onChange={handleChange}
                   data-list-id={item.id}
+                  rows={2}
                 />
                 <Button
                   buttonType="negative"
