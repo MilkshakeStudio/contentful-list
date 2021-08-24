@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { Form, Card, TextInput, Textarea, FormLabel, Button } from '@contentful/forma-36-react-components';
+import { Form, Card, TextInput, Textarea, FormLabel, Button, Icon } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { arrayMoveImmutable } from 'array-move';
@@ -131,17 +131,31 @@ export const App = ({sdk}) => {
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            <Card>
-              <Form spacing="condensed" >
-                <FormLabel htmlFor="header">Heading</FormLabel>
+            <Card
+              className="list-item-wrapper"
+            >
+              <div className="drag-icon">
+                <Icon icon="Drag" />
+              </div>
+              <div className="list-item list-item-header" >
+                <FormLabel
+                  htmlFor="header"
+                  className="list-item-title"
+                >Heading</FormLabel>
                 <TextInput
                   type="text"
                   name="header"
                   value={item.header}
                   onChange={handleChange}
                   data-list-id={item.id}
+                  className="list-item-input"
                 />
-                <FormLabel htmlFor="content">Content</FormLabel>
+              </div>
+              <div className="list-item list-item-content" >
+                <FormLabel
+                  htmlFor="content"
+                  className="list-item-title"
+                >Content</FormLabel>
                 <Textarea
                   type="text"
                   name="content"
@@ -149,7 +163,10 @@ export const App = ({sdk}) => {
                   onChange={handleChange}
                   data-list-id={item.id}
                   rows={2}
+                  className="list-item-input"
                 />
+              </div>
+              <div className="list-item list-item-btn-remove" >
                 <Button
                   buttonType="negative"
                   size="small"
@@ -158,7 +175,7 @@ export const App = ({sdk}) => {
                   onClick={handleDeleteItem}
                   className="btn-remove" 
                 ></Button>
-              </Form>
+              </div>
             </Card>
           </li>
         )}
@@ -177,6 +194,7 @@ export const App = ({sdk}) => {
       <Droppable droppableId="list-block-droppable">
         {(provided) => (
           <ul
+            className="list"
             ref={provided.innerRef}
             { ...provided.droppableProps}
           >
@@ -185,12 +203,14 @@ export const App = ({sdk}) => {
           </ul>
         )}
       </Droppable>
-      <Button
-        buttonType="positive"
-        size="small"
-        icon="Plus"
-        onClick={handleAddItem}
-      ></Button>
+      <div className="list-item-btn-add" >
+        <Button
+          buttonType="positive"
+          size="small"
+          icon="Plus"
+          onClick={handleAddItem}
+        >add row</Button>
+      </div>
     </DragDropContext>
   )
 }

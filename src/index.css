@@ -8,3 +8,47 @@ div {
   font: inherit;
   vertical-align: baseline;
 }
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.list-item-wrapper {
+  display: grid;
+  grid-template: auto auto / auto 1fr;
+  grid-template-areas:
+    "ico hea"
+    "remove-btn con";
+  gap: 14px;
+}
+
+.drag-icon {
+  grid-area: ico;
+}
+
+.list-item-header {
+  grid-area: hea;
+}
+
+.list-item-content {
+  grid-area: con;
+}
+
+.list-item-btn-remove {
+  grid-area: remove-btn;
+  align-self: end;
+}
+
+.list-item {
+  /* padding: 0 0 14px; */
+}
+
+.list-item-btn-remove {
+  grid-area: remove-btn;
+  padding: 0;
+}
+
+.list-item-btn-add {
+  display: flex;
+}
