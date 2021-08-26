@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { Form, Card, TextInput, Textarea, FormLabel, Button, Icon } from '@contentful/forma-36-react-components';
+import { Card, TextInput, Textarea, FormLabel, Button, Icon } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { arrayMoveImmutable } from 'array-move';
@@ -15,18 +15,7 @@ export const App = ({sdk}) => {
 //  CONTENT STATE
 //===============================================================/
 
-  const [ listItems, setListItems ] = useState( sdk.field.getValue() ||
-    {
-      listArr: [
-        {
-          id: uuidv4(),
-          header: "",
-          content: ""
-        }
-      ],
-      dragging: false
-    }
-  )
+  const [ listItems, setListItems ] = useState( sdk.field.getValue() )
 
 //===============================================================/
 //  CONTENT HANDLERS
