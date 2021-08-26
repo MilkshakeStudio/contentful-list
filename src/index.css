@@ -40,10 +40,6 @@ div {
   align-self: end;
 }
 
-.list-item {
-  /* padding: 0 0 14px; */
-}
-
 .list-item-btn-remove {
   grid-area: remove-btn;
   padding: 0;
