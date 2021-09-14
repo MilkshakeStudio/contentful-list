@@ -25,6 +25,7 @@ div {
 
 .drag-icon {
   grid-area: ico;
+  cursor: pointer;
 }
 
 .list-item-header {

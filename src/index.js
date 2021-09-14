@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { Card, TextInput, Textarea, FormLabel, Button, Icon } from '@contentful/forma-36-react-components';
+import { Card, TextInput, Textarea, FormLabel, Button, Icon  } from '@contentful/forma-36-react-components';
 import { init } from 'contentful-ui-extensions-sdk';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { arrayMoveImmutable } from 'array-move';
 import { v4 as uuidv4 } from 'uuid';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
+import { arrayMoveImmutable } from 'array-move';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
@@ -15,7 +15,17 @@ export const App = ({sdk}) => {
 //  CONTENT STATE
 //===============================================================/
 
-  const [ listItems, setListItems ] = useState( sdk.field.getValue() )
+  const [ listItems, setListItems ] = useState( sdk.field.getValue() || 
+    {
+      listArr: [
+        {
+          id: uuidv4(),
+          header: "",
+          content: ""
+        }
+      ]
+    }
+  )
 
 //===============================================================/
 //  CONTENT HANDLERS
@@ -91,15 +101,13 @@ export const App = ({sdk}) => {
     sdk.field.setValue(listItems)
   }
 
-  const onDragEnd = (result) => {
-    const sourceIndex = result.source.index
-    const destinationIndex = result.destination.index
-    const oldList = listItems.listArr.slice()
-    const newList = arrayMoveImmutable(oldList, sourceIndex, destinationIndex)
+  const handleReorder = ({oldIndex, newIndex}) => {
+    const newList = listItems.listArr.slice()
+    const orderedList = arrayMoveImmutable(newList, oldIndex, newIndex)
     setListItems( prevState => (
       {
         ...prevState,
-        listArr: newList
+        listArr: orderedList
       }
     ))
     sdk.field.setValue(listItems)
@@ -109,89 +117,91 @@ export const App = ({sdk}) => {
 //  SORTABLE COMPONENTS
 //===============================================================/
 
-  const SortableItem = (item, i) => {
+  const SortableItem = SortableElement(({data}) => {
     return (
-      <Draggable draggableId={item.id} index={i} key={item.id}>
-        {(provided) => (
-          <li
-            key={item.id}
-            id={item.id}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            <Card
-              className="list-item-wrapper"
-            >
-              <div className="drag-icon">
-                <Icon icon="Drag" />
-              </div>
-              <div className="list-item list-item-header" >
-                <FormLabel
-                  htmlFor="header"
-                  className="list-item-title"
-                >Heading</FormLabel>
-                <TextInput
-                  type="text"
-                  name="header"
-                  value={item.header}
-                  onChange={handleChange}
-                  data-list-id={item.id}
-                  className="list-item-input"
-                />
-              </div>
-              <div className="list-item list-item-content" >
-                <FormLabel
-                  htmlFor="content"
-                  className="list-item-title"
-                >Content</FormLabel>
-                <Textarea
-                  type="text"
-                  name="content"
-                  value={item.content}
-                  onChange={handleChange}
-                  data-list-id={item.id}
-                  rows={2}
-                  className="list-item-input"
-                />
-              </div>
-              <div className="list-item list-item-btn-remove" >
-                <Button
-                  buttonType="negative"
-                  size="small"
-                  icon="HorizontalRule"
-                  data-list-id={item.id}
-                  onClick={handleDeleteItem}
-                  className="btn-remove" 
-                ></Button>
-              </div>
-            </Card>
-          </li>
-        )}
-      </Draggable>
+      <li
+        key={data.id}
+        id={data.id}
+      >
+        <Card
+          className="list-item-wrapper"
+        >
+          <div className="drag-icon">
+            <Icon icon="Drag" />
+          </div>
+          <div className="list-item list-item-header" >
+            <FormLabel
+              htmlFor="header"
+              className="list-item-title"
+            >Heading</FormLabel>
+            <TextInput
+              type="text"
+              name="header"
+              value={data.header}
+              onBlur={handleChange}
+              data-list-id={data.id}
+              className="list-item-input"
+            />
+          </div>
+          <div className="list-item list-item-content" >
+            <FormLabel
+              htmlFor="content"
+              className="list-item-title"
+            >Content</FormLabel>
+            <Textarea
+              type="text"
+              name="content"
+              value={data.content}
+              onBlur={handleChange}
+              data-list-id={data.id}
+              rows={2}
+              className="list-item-input"
+            />
+          </div>
+          <div className="list-item list-item-btn-remove" >
+            <Button
+              buttonType="negative"
+              size="small"
+              icon="HorizontalRule"
+              data-list-id={data.id}
+              onClick={handleDeleteItem}
+              className="btn-remove" 
+            ></Button>
+          </div>
+        </Card>
+      </li>
     )
-  }
+  })
+
+  const SortableList = SortableContainer(() => {
+    return (
+      <ul
+        className="list"
+        key="main"
+      >
+        {listItems.listArr.map( (item, i) => ( 
+          <SortableItem
+            data={item}
+            key={item.id}
+            index={i}
+          />
+        ))}
+      </ul>
+    )
+  })
 
 //===============================================================/
 //  RENDERED COMPONENT
 //===============================================================/
 
   return (
-    <DragDropContext
-      onDragEnd={onDragEnd}
-    >
-      <Droppable droppableId="list-block-droppable">
-        {(provided) => (
-          <ul
-            className="list"
-            ref={provided.innerRef}
-            { ...provided.droppableProps}
-          >
-            {listItems.listArr.map( (item, i) => ( SortableItem(item, i) ))}
-            {provided.placeholder}
-          </ul>
-        )}
-      </Droppable>
+    <>
+      <SortableList
+        onSortEnd={handleReorder}
+        lockAxis="y"
+        distance={15}
+        key="main"
+      />
       <div className="list-item-btn-add" >
         <Button
           buttonType="positive"
@@ -200,7 +210,7 @@ export const App = ({sdk}) => {
           onClick={handleAddItem}
         >add row</Button>
       </div>
-    </DragDropContext>
+    </>
   )
 }
 
